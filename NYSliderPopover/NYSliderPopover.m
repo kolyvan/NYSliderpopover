@@ -11,18 +11,32 @@
 
 @implementation NYSliderPopover
 
+- (void) dealloc
+{
+    if (_popover) {
+        [_popover removeFromSuperview];
+    }
+}
+
 #pragma mark -
 #pragma mark UISlider methods
 
 - (NYPopover *)popover
 {
-    if (_popover == nil) {
+    if (_popover == nil && self.window) {
+        
+        UIView *mainView = self.window;
+        
         //Default size, can be changed after
         [self addTarget:self action:@selector(updatePopoverFrame) forControlEvents:UIControlEventValueChanged];
-        _popover = [[NYPopover alloc] initWithFrame:CGRectMake(self.frame.origin.x, self.frame.origin.y - 32, 40, 32)];
+        
+        const CGRect frame = [mainView convertRect:CGRectMake(0, -32, 40, 32) fromView:self];
+        _popover = [[NYPopover alloc] initWithFrame:frame];
+        
         [self updatePopoverFrame];
         _popover.alpha = 0;
-        [self.superview addSubview:_popover];
+                
+        [mainView addSubview:_popover];
     }
     
     return _popover;
@@ -71,7 +85,8 @@
 		minimum = 0.0;
 	}
 	
-	CGFloat x = self.frame.origin.x;
+    const CGRect frame = [_popover.superview convertRect:self.bounds fromView:self];
+    CGFloat x = frame.origin.x;
     CGFloat maxMin = (maximum + minimum) / 2.0;
     
     x += (((value - minimum) / (maximum - minimum)) * self.frame.size.width) - (self.popover.frame.size.width / 2.0);
@@ -95,7 +110,7 @@
     
     CGRect popoverRect = self.popover.frame;
     popoverRect.origin.x = x;
-    popoverRect.origin.y = self.frame.origin.y - popoverRect.size.height - 1;
+    popoverRect.origin.y = frame.origin.y - popoverRect.size.height - 1;
     
     self.popover.frame = popoverRect;
 }
