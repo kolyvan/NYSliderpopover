@@ -25,7 +25,11 @@
 {
     if (_popover == nil && self.window) {
         
-        UIView *mainView = self.window;
+        UIView *mainView = self.superview;
+        while (mainView.superview != self.window &&
+               mainView.superview != nil) {
+            mainView = mainView.superview;
+        }
         
         //Default size, can be changed after
         [self addTarget:self action:@selector(updatePopoverFrame) forControlEvents:UIControlEventValueChanged];
